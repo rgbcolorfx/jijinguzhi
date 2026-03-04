@@ -6,7 +6,6 @@ const recentListEl = document.getElementById('recentList');
 const clearRecentBtn = document.getElementById('clearRecentBtn');
 const favoritePreviewListEl = document.getElementById('favoritePreviewList');
 const refreshFavoritesBtn = document.getElementById('refreshFavoritesBtn');
-const API_BASE = (window.API_BASE || localStorage.getItem('api_base') || '').trim().replace(/\/$/, '');
 
 const RECENT_KEY = 'recent_fund_codes';
 const RECENT_LIMIT = 8;
@@ -16,54 +15,6 @@ const FAVORITE_LIMIT = 8;
 function formatNum(value, digits = 4) {
   if (value === null || value === undefined || Number.isNaN(Number(value))) return '--';
   return Number(value).toFixed(digits);
-}
-
-function apiUrl(path) {
-  return API_BASE ? `${API_BASE}${path}` : path;
-}
-
-function estimatePathCandidates(code) {
-  const q = `code=${encodeURIComponent(code)}`;
-  if (API_BASE) {
-    return [`${apiUrl(`/api/estimate?${q}`)}`];
-  }
-  return [
-    `/api/estimate?${q}`,
-    `/.netlify/functions/estimate?${q}`
-  ];
-}
-
-async function fetchJson(path) {
-  const res = await fetch(apiUrl(path));
-  const contentType = (res.headers.get('content-type') || '').toLowerCase();
-  if (!contentType.includes('application/json')) {
-    const txt = await res.text();
-    throw new Error(`接口返回非JSON: ${txt.slice(0, 80)}`);
-  }
-  const payload = await res.json();
-  return { res, payload };
-}
-
-async function fetchEstimate(code) {
-  const urls = estimatePathCandidates(code);
-  let lastError = null;
-
-  for (const url of urls) {
-    try {
-      const res = await fetch(url);
-      const contentType = (res.headers.get('content-type') || '').toLowerCase();
-      if (!contentType.includes('application/json')) {
-        const txt = await res.text();
-        throw new Error(`接口返回非JSON(${url}): ${txt.slice(0, 60)}`);
-      }
-      const payload = await res.json();
-      return { res, payload, url };
-    } catch (err) {
-      lastError = err;
-    }
-  }
-
-  throw lastError || new Error('估值接口请求失败');
 }
 
 function formatPct(value, digits = 2) {
@@ -226,7 +177,8 @@ async function loadFavoritePreviews() {
 
   const cards = await Promise.all(favorites.map(async (item) => {
     try {
-      const { res, payload } = await fetchEstimate(item.code);
+      const res = await fetch(`/api/estimate?code=${encodeURIComponent(item.code)}`);
+      const payload = await res.json();
       if (!res.ok || !payload.ok || !payload.data) {
         return { ...item, estimatedRate: null };
       }
@@ -297,7 +249,8 @@ async function queryFund() {
   queryBtn.textContent = '查询中...';
 
   try {
-    const { res, payload } = await fetchEstimate(code);
+    const res = await fetch(`/api/estimate?code=${encodeURIComponent(code)}`);
+    const payload = await res.json();
 
     if (!res.ok || !payload.ok) {
       throw new Error(payload.error || '查询失败');
