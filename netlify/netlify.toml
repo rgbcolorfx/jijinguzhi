@@ -1,0 +1,9 @@
+[build]
+  publish = "web"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/estimate"
+  to = "/.netlify/functions/estimate"
+  status = 200
+  force = true
