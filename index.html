@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>基金实时估值</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <h1>基金实时估值</h1>
+      <p class="desc">基于基金最新披露持仓 + 股票实时行情估算当日净值</p>
+      <div class="favorite-preview">
+        <div class="favorite-head">
+          <span class="recent-label">收藏预览</span>
+          <button id="refreshFavoritesBtn" class="btn-link" type="button">刷新</button>
+        </div>
+        <div id="favoritePreviewList" class="favorite-grid"></div>
+      </div>
+
+      <div class="form-row">
+        <input id="fundCode" type="text" maxlength="6" placeholder="输入6位基金代码，例如 161725" />
+        <button id="queryBtn">查询估值</button>
+      </div>
+      <div class="recent-row">
+        <span class="recent-label">最近查询</span>
+        <div id="recentList" class="recent-list"></div>
+        <button id="clearRecentBtn" class="btn-link" type="button">清空</button>
+      </div>
+      <p class="tips">说明：若持仓解析失败，会退回使用第三方提供的实时估值。</p>
+
+      <div id="result" class="result hidden"></div>
+      <div id="error" class="error hidden"></div>
+    </section>
+  </main>
+
+  <script src="/main.js"></script>
+</body>
+</html>
